@@ -735,19 +735,31 @@ echo ""
 
 OVERLAY_FTP="$LAB_DIR/${FTP_VM}-disk.qcow2"
 if [[ -f "$OVERLAY_FTP" ]]; then rm -f "$OVERLAY_FTP"; fi
-create_overlay "$CLOUD_IMAGE_FILE" "$OVERLAY_FTP" "${QLAB_DISK_SIZE:-}"
+create_overlay "$CLOUD_IMAGE_FILE" "$OVERLAY_FTP" "${QLAB_DISK_SIZE:-}" || {
+    error "Failed to create overlay disk for FTP server."
+    exit 1
+}
 
 OVERLAY_NFS="$LAB_DIR/${NFS_VM}-disk.qcow2"
 if [[ -f "$OVERLAY_NFS" ]]; then rm -f "$OVERLAY_NFS"; fi
-create_overlay "$CLOUD_IMAGE_FILE" "$OVERLAY_NFS" "${QLAB_DISK_SIZE:-}"
+create_overlay "$CLOUD_IMAGE_FILE" "$OVERLAY_NFS" "${QLAB_DISK_SIZE:-}" || {
+    error "Failed to create overlay disk for NFS server."
+    exit 1
+}
 
 OVERLAY_SAMBA="$LAB_DIR/${SAMBA_VM}-disk.qcow2"
 if [[ -f "$OVERLAY_SAMBA" ]]; then rm -f "$OVERLAY_SAMBA"; fi
-create_overlay "$CLOUD_IMAGE_FILE" "$OVERLAY_SAMBA" "${QLAB_DISK_SIZE:-}"
+create_overlay "$CLOUD_IMAGE_FILE" "$OVERLAY_SAMBA" "${QLAB_DISK_SIZE:-}" || {
+    error "Failed to create overlay disk for Samba server."
+    exit 1
+}
 
 OVERLAY_CLIENT="$LAB_DIR/${CLIENT_VM}-disk.qcow2"
 if [[ -f "$OVERLAY_CLIENT" ]]; then rm -f "$OVERLAY_CLIENT"; fi
-create_overlay "$CLOUD_IMAGE_FILE" "$OVERLAY_CLIENT" "${QLAB_DISK_SIZE:-}"
+create_overlay "$CLOUD_IMAGE_FILE" "$OVERLAY_CLIENT" "${QLAB_DISK_SIZE:-}" || {
+    error "Failed to create overlay disk for client."
+    exit 1
+}
 echo ""
 
 # =============================================
