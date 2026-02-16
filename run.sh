@@ -115,6 +115,7 @@ users:
 ssh_pwauth: true
 packages:
   - vsftpd
+  - rsyslog
   - nano
   - net-tools
   - iputils-ping
@@ -159,6 +160,8 @@ write_files:
       dirmessage_enable=YES
       use_localtime=YES
       xferlog_enable=YES
+      vsftpd_log_file=/var/log/vsftpd.log
+      log_ftp_protocol=YES
       connect_from_port_20=YES
       chroot_local_user=YES
       allow_writeable_chroot=YES
@@ -262,6 +265,7 @@ users:
 ssh_pwauth: true
 packages:
   - nfs-kernel-server
+  - rsyslog
   - nano
   - net-tools
   - iputils-ping
@@ -384,6 +388,7 @@ users:
 ssh_pwauth: true
 packages:
   - samba
+  - rsyslog
   - nano
   - net-tools
   - iputils-ping
@@ -495,6 +500,7 @@ runcmd:
   - printf "labpass\nlabpass\n" | smbpasswd -a -s bob
   # Configure Samba
   - cp /etc/samba/smb.conf.lab /etc/samba/smb.conf
+  - mkdir -p /var/log/samba
   - systemctl restart smbd
   - systemctl enable smbd
   - systemctl restart nmbd
