@@ -358,7 +358,8 @@ On **filesharing-lab-samba**:
 ```bash
 sudo smbstatus
 sudo pdbedit -L
-sudo tail -20 /var/log/samba/log.*
+sudo ls /var/log/samba/
+sudo tail -20 /var/log/samba/log.smbd
 ```
 
 ---

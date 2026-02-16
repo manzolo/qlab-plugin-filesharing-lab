@@ -514,7 +514,7 @@ write_files:
           \033[0;32mcat /etc/samba/smb.conf\033[0m              show config
           \033[0;32msudo smbstatus\033[0m                       active connections
           \033[0;32msudo pdbedit -L\033[0m                      list Samba users
-          \033[0;32msudo tail -f /var/log/samba/log.*\033[0m    follow logs
+          \033[0;32msudo tail -f /var/log/samba/log.smbd\033[0m  follow logs
           \033[0;32msystemctl status smbd\033[0m                Samba status
 
         \033[1;33mCredentials:\033[0m  \033[1;36mlabuser\033[0m / \033[1;36mlabpass\033[0m
