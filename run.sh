@@ -62,7 +62,7 @@ LAB_DIR="lab"
 IMAGE_DIR="$WORKSPACE_DIR/images"
 CLOUD_IMAGE_URL=$(get_config CLOUD_IMAGE_URL "https://cloud-images.ubuntu.com/minimal/releases/jammy/release/ubuntu-22.04-minimal-cloudimg-amd64.img")
 CLOUD_IMAGE_FILE="$IMAGE_DIR/ubuntu-22.04-minimal-cloudimg-amd64.img"
-MEMORY="${QLAB_MEMORY:-$(get_config DEFAULT_MEMORY 512)}"
+MEMORY="${QLAB_MEMORY:-$(get_config DEFAULT_MEMORY 768)}"
 
 # Ensure directories exist
 mkdir -p "$LAB_DIR" "$IMAGE_DIR"
@@ -834,5 +834,5 @@ echo "  Stop all VMs:"
 echo "    qlab stop $PLUGIN_NAME"
 echo ""
 echo "  Tip: override resources with environment variables:"
-echo "    QLAB_MEMORY=1024 QLAB_DISK_SIZE=30G qlab run ${PLUGIN_NAME}"
+echo "    QLAB_MEMORY=1024 qlab run ${PLUGIN_NAME}"
 echo "============================================="
