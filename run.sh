@@ -472,6 +472,7 @@ write_files:
       server string = filesharing-lab Samba Server
       security = user
       map to guest = Bad User
+      logging = file
       log file = /var/log/samba/log.%m
       max log size = 1000
       server role = standalone server
