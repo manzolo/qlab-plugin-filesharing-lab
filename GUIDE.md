@@ -321,21 +321,26 @@ smb: \> exit
 ### 3.4 Mount Samba share with CIFS
 
 ```bash
-sudo mount -t cifs //smb-server/shared /mnt/smb-shared -o username=alice,password=labpass
+sudo mount -t cifs //smb-server/shared /mnt/smb-shared \
+  -o username=alice,password=labpass,uid=$(id -u alice),gid=$(id -g alice),file_mode=0775,dir_mode=0775
 ls -la /mnt/smb-shared/
 ```
 
-Write a file:
+> **Note:** The `uid` and `gid` options map the remote files to a local user, so that the local shell can write. Without them, files appear owned by `root` and only root can write. The actual Samba authentication (who can read/write on the server) is handled by `username=alice`.
+
+Write a file as alice:
 
 ```bash
+sudo -u alice bash
 echo "Written via CIFS mount" > /mnt/smb-shared/cifs-test.txt
 ls -la /mnt/smb-shared/
+exit
 ```
 
 ### 3.5 Mount the public share
 
 ```bash
-sudo mount -t cifs //smb-server/public /mnt/smb-public -o guest
+sudo mount -t cifs //smb-server/public /mnt/smb-public -o guest,uid=$(id -u labuser),gid=$(id -g labuser)
 ls -la /mnt/smb-public/
 cat /mnt/smb-public/README.txt
 ```
@@ -398,8 +403,9 @@ sudo -u alice cp /tmp/testfile.txt /mnt/nfs-shared/nfs-upload.txt
 Make sure the share is mounted (if not already):
 
 ```bash
-sudo mount -t cifs //smb-server/shared /mnt/smb-shared -o username=alice,password=labpass 2>/dev/null
-cp /tmp/testfile.txt /mnt/smb-shared/smb-upload.txt
+sudo mount -t cifs //smb-server/shared /mnt/smb-shared \
+  -o username=alice,password=labpass,uid=$(id -u alice),gid=$(id -g alice),file_mode=0775,dir_mode=0775 2>/dev/null
+sudo -u alice cp /tmp/testfile.txt /mnt/smb-shared/smb-upload.txt
 ```
 
 ### 4.5 Verify on each server
