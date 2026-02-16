@@ -185,14 +185,16 @@ Expected output:
 
 ```
 Export list for nfs-server:
-/srv/nfs/readonly  192.168.100.0/24
-/srv/nfs/shared    192.168.100.0/24
+/readonly (everyone)
+/shared   (everyone)
 ```
+
+> **Note:** This lab uses nfs-ganesha (user-space NFS server) which exposes pseudo-paths. The actual server directories are `/srv/nfs/shared` and `/srv/nfs/readonly`.
 
 ### 2.2 Mount the read-write share
 
 ```bash
-sudo mount -t nfs nfs-server:/srv/nfs/shared /mnt/nfs-shared
+sudo mount -t nfs4 nfs-server:/shared /mnt/nfs-shared
 ```
 
 Verify:
@@ -233,7 +235,7 @@ The file should show `alice` as the owner because UID 2001 matches on both clien
 ### 2.5 Mount the read-only share
 
 ```bash
-sudo mount -t nfs nfs-server:/srv/nfs/readonly /mnt/nfs-readonly
+sudo mount -t nfs4 nfs-server:/readonly /mnt/nfs-readonly
 ls -la /mnt/nfs-readonly/
 cat /mnt/nfs-readonly/sample-data.txt
 ```
@@ -246,13 +248,15 @@ touch /mnt/nfs-readonly/test.txt
 
 Expected error: `touch: cannot touch '/mnt/nfs-readonly/test.txt': Read-only file system`
 
-### 2.6 Check active exports on the server
+### 2.6 Check NFS Ganesha status on the server
 
 On **filesharing-lab-nfs**:
 
 ```bash
-sudo exportfs -v
-systemctl status nfs-server
+systemctl status nfs-ganesha
+showmount -e localhost
+sudo journalctl -u nfs-ganesha --no-pager -n 20
+cat /etc/ganesha/ganesha.conf
 ```
 
 ---
@@ -385,7 +389,7 @@ ftp> bye
 Make sure the share is mounted (if not already):
 
 ```bash
-sudo mount -t nfs nfs-server:/srv/nfs/shared /mnt/nfs-shared 2>/dev/null
+sudo mount -t nfs4 nfs-server:/shared /mnt/nfs-shared 2>/dev/null
 sudo -u alice cp /tmp/testfile.txt /mnt/nfs-shared/nfs-upload.txt
 ```
 
@@ -458,14 +462,15 @@ lftp -u alice,labpass ftp-server
 
 ### NFS: "mount.nfs: access denied by server"
 
-- Check the server exports: `sudo exportfs -v` on the NFS server
-- Verify your client IP is in 192.168.100.0/24
-- Restart NFS server: `sudo systemctl restart nfs-server`
+- Check the server config: `cat /etc/ganesha/ganesha.conf` on the NFS server
+- Verify nfs-ganesha is running: `systemctl status nfs-ganesha`
+- Restart NFS server: `sudo systemctl restart nfs-ganesha`
+- Use NFSv4 pseudo-paths: mount `nfs-server:/shared` not `nfs-server:/srv/nfs/shared`
 
 ### NFS: permission denied when writing
 
 - Check the UID of the user on the client matches the UID on the server
-- For the `shared` export, `no_root_squash` is set, so root can write
+- For the `shared` export, `No_Root_Squash` is set, so root can write
 - For the `readonly` export, writing is not allowed by design
 
 ### Samba: "NT_STATUS_LOGON_FAILURE"

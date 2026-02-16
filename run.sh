@@ -264,7 +264,8 @@ users:
       - "__QLAB_SSH_PUB_KEY__"
 ssh_pwauth: true
 packages:
-  - nfs-kernel-server
+  - nfs-ganesha
+  - nfs-ganesha-vfs
   - rsyslog
   - nano
   - net-tools
@@ -297,33 +298,77 @@ write_files:
               macaddress: "52:54:00:00:09:02"
             addresses:
               - 192.168.100.2/24
-  - path: /etc/exports.lab
+  - path: /etc/ganesha/ganesha.conf.lab
     permissions: '0644'
     content: |
-      /srv/nfs/shared    192.168.100.0/24(rw,sync,no_subtree_check,no_root_squash)
-      /srv/nfs/readonly  192.168.100.0/24(ro,sync,no_subtree_check)
+      NFS_CORE_PARAM {
+          Protocols = 3, 4;
+          Bind_addr = 0.0.0.0;
+      }
+
+      EXPORT {
+          Export_Id = 1;
+          Path = /srv/nfs/shared;
+          Pseudo = /shared;
+          Access_Type = RW;
+          Squash = No_Root_Squash;
+          SecType = sys;
+          Transports = UDP, TCP;
+          FSAL {
+              Name = VFS;
+          }
+          CLIENT {
+              Clients = 192.168.100.0/24;
+              Access_Type = RW;
+          }
+      }
+
+      EXPORT {
+          Export_Id = 2;
+          Path = /srv/nfs/readonly;
+          Pseudo = /readonly;
+          Access_Type = RO;
+          Squash = Root_Squash;
+          SecType = sys;
+          Transports = UDP, TCP;
+          FSAL {
+              Name = VFS;
+          }
+          CLIENT {
+              Clients = 192.168.100.0/24;
+              Access_Type = RO;
+          }
+      }
+
+      LOG {
+          Default_Log_Level = EVENT;
+          Components {
+              ALL = EVENT;
+          }
+      }
   - path: /etc/motd.raw
     content: |
       \033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m
-        \033[1;32mfilesharing-lab-nfs\033[0m — \033[1mNFS Server\033[0m
+        \033[1;32mfilesharing-lab-nfs\033[0m — \033[1mNFS Server (Ganesha)\033[0m
       \033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m
 
-        \033[1;33mRole:\033[0m  NFS Server
+        \033[1;33mRole:\033[0m  NFS Server (user-space, nfs-ganesha)
         \033[1;33mInternal IP:\033[0m  \033[1;36m192.168.100.2\033[0m
 
         \033[1;33mExports:\033[0m
-          \033[0;32m/srv/nfs/shared\033[0m     rw, no_root_squash
-          \033[0;32m/srv/nfs/readonly\033[0m   ro
+          \033[0;32m/srv/nfs/shared\033[0m     rw, no_root_squash (pseudo: /shared)
+          \033[0;32m/srv/nfs/readonly\033[0m   ro                 (pseudo: /readonly)
 
         \033[1;33mUsers (UID fixed for NFS mapping):\033[0m
           \033[0;32malice\033[0m (UID 2001) / labpass
           \033[0;32mbob\033[0m   (UID 2002) / labpass
 
         \033[1;33mUseful Commands:\033[0m
-          \033[0;32mcat /etc/exports\033[0m                show exports
-          \033[0;32msudo exportfs -v\033[0m                 show active exports
-          \033[0;32msystemctl status nfs-server\033[0m      NFS status
-          \033[0;32mls -la /srv/nfs/shared\033[0m           list shared files
+          \033[0;32mcat /etc/ganesha/ganesha.conf\033[0m        show config
+          \033[0;32mshowmount -e localhost\033[0m               show exports
+          \033[0;32msystemctl status nfs-ganesha\033[0m         NFS status
+          \033[0;32msudo journalctl -u nfs-ganesha -f\033[0m    follow logs
+          \033[0;32mls -la /srv/nfs/shared\033[0m               list shared files
 
         \033[1;33mCredentials:\033[0m  \033[1;36mlabuser\033[0m / \033[1;36mlabpass\033[0m
         \033[1;33mExit:\033[0m         type '\033[1;31mexit\033[0m'
@@ -347,13 +392,10 @@ runcmd:
   - chown -R alice:alice /srv/nfs/shared
   - chmod 775 /srv/nfs/shared
   - chmod 755 /srv/nfs/readonly
-  # Configure NFS exports
-  - cp /etc/exports.lab /etc/exports
-  - systemctl enable rpcbind
-  - systemctl restart rpcbind
-  - systemctl enable nfs-server
-  - systemctl restart nfs-server
-  - exportfs -ra
+  # Configure NFS Ganesha
+  - cp /etc/ganesha/ganesha.conf.lab /etc/ganesha/ganesha.conf
+  - systemctl enable nfs-ganesha
+  - systemctl restart nfs-ganesha
   # MOTD setup
   - chmod -x /etc/update-motd.d/*
   - sed -i 's/^#\?PrintMotd.*/PrintMotd yes/' /etc/ssh/sshd_config
