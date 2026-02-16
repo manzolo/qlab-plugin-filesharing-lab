@@ -349,9 +349,11 @@ runcmd:
   - chmod 755 /srv/nfs/readonly
   # Configure NFS exports
   - cp /etc/exports.lab /etc/exports
-  - exportfs -ra
-  - systemctl restart nfs-server
+  - systemctl enable rpcbind
+  - systemctl restart rpcbind
   - systemctl enable nfs-server
+  - systemctl restart nfs-server
+  - exportfs -ra
   # MOTD setup
   - chmod -x /etc/update-motd.d/*
   - sed -i 's/^#\?PrintMotd.*/PrintMotd yes/' /etc/ssh/sshd_config
