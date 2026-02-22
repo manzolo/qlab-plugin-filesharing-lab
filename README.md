@@ -100,12 +100,25 @@ smbclient -L smb-server -U alice
 
 ## Exercises
 
-See [GUIDE.md](GUIDE.md) for detailed step-by-step exercises:
+See the [Step-by-Step Guide](guide.md) for detailed step-by-step exercises:
 
-1. **FTP** — anonymous and authenticated access, chroot, uploads
-2. **NFS** — mount exports, test permissions, UID mapping
-3. **Samba** — smbclient, CIFS mounts, guest vs authenticated
-4. **Cross-protocol comparison** — same operation on all three, comparison table
+| # | Exercise | What you'll do |
+|---|----------|----------------|
+| 1 | **FTP** | Anonymous and authenticated access, chroot, uploads |
+| 2 | **NFS** | Mount exports, test permissions, UID mapping |
+| 3 | **Samba** | smbclient, CIFS mounts, guest vs authenticated |
+| 4 | **Cross-protocol comparison** | Same operation on all three, comparison table |
+
+## Automated Tests
+
+An automated test suite validates the exercises against running VMs:
+
+```bash
+# Start the lab first
+qlab run filesharing-lab
+# Wait ~90s for cloud-init, then run all tests
+qlab test filesharing-lab
+```
 
 ## Resource Override
 
