@@ -1,6 +1,10 @@
-# filesharing-lab
+# filesharing-lab — Samba, NFS, FTP Lab
 
-A multi-VM lab that deploys three file sharing servers (FTP, NFS, Samba) and a shared client to compare protocols, authentication models, and use cases.
+[![QLab Plugin](https://img.shields.io/badge/QLab-Plugin-blue)](https://github.com/manzolo/qlab)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)](https://github.com/manzolo/qlab)
+
+A [QLab](https://github.com/manzolo/qlab) plugin for multi-VM lab that deploys three file sharing servers (FTP, NFS, Samba) and a shared client to compare protocols, authentication models, and use cases.
 
 ## Architecture
 
