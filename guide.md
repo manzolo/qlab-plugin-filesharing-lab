@@ -120,12 +120,17 @@ Name: alice
 Password: labpass
 ```
 
-You are chrooted to alice's home directory. Try navigating and uploading:
+You are chrooted to alice's home directory. Navigate to the upload directory and upload a file:
 
 ```
 ftp> ls
 ftp> cd upload
 ftp> ls
+```
+
+The directory is empty — this is where you will upload files. Upload a test file:
+
+```
 ftp> put /etc/hostname test-upload.txt
 ftp> ls
 ftp> bye
