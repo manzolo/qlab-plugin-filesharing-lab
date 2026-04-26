@@ -120,6 +120,10 @@ packages:
   - net-tools
   - iputils-ping
   - tcpdump
+  - zsh
+  - vim
+  - nano
+  - fonts-powerline
 write_files:
   - path: /etc/profile.d/cloud-init-status.sh
     permissions: '0755'
@@ -203,6 +207,13 @@ write_files:
       \033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m
 
 
+  - path: /tmp/setup-zsh.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      sed -i 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' ~/.zshrc
+      sed -i 's/^plugins=(.*)/plugins=(git)/' ~/.zshrc
 runcmd:
   - netplan apply
   # Create users alice and bob
@@ -236,6 +247,8 @@ runcmd:
   - printf '%b\n' "$(cat /etc/motd.raw)" > /etc/motd
   - rm -f /etc/motd.raw
   - systemctl restart sshd
+  - sudo -Hu labuser bash /tmp/setup-zsh.sh
+  - chsh -s /usr/bin/zsh labuser
   - echo "=== filesharing-lab-ftp VM is ready! ==="
 USERDATA
 
@@ -271,6 +284,10 @@ packages:
   - net-tools
   - iputils-ping
   - tcpdump
+  - zsh
+  - vim
+  - nano
+  - fonts-powerline
 write_files:
   - path: /etc/profile.d/cloud-init-status.sh
     permissions: '0755'
@@ -376,6 +393,13 @@ write_files:
       \033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m
 
 
+  - path: /tmp/setup-zsh.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      sed -i 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' ~/.zshrc
+      sed -i 's/^plugins=(.*)/plugins=(git)/' ~/.zshrc
 runcmd:
   - netplan apply
   # Create users with fixed UIDs for NFS mapping
@@ -403,6 +427,8 @@ runcmd:
   - printf '%b\n' "$(cat /etc/motd.raw)" > /etc/motd
   - rm -f /etc/motd.raw
   - systemctl restart sshd
+  - sudo -Hu labuser bash /tmp/setup-zsh.sh
+  - chsh -s /usr/bin/zsh labuser
   - echo "=== filesharing-lab-nfs VM is ready! ==="
 USERDATA
 
@@ -437,6 +463,10 @@ packages:
   - net-tools
   - iputils-ping
   - tcpdump
+  - zsh
+  - vim
+  - nano
+  - fonts-powerline
 write_files:
   - path: /etc/profile.d/cloud-init-status.sh
     permissions: '0755'
@@ -523,6 +553,13 @@ write_files:
       \033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m
 
 
+  - path: /tmp/setup-zsh.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      sed -i 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' ~/.zshrc
+      sed -i 's/^plugins=(.*)/plugins=(git)/' ~/.zshrc
 runcmd:
   - netplan apply
   # Create users alice and bob
@@ -557,6 +594,8 @@ runcmd:
   - printf '%b\n' "$(cat /etc/motd.raw)" > /etc/motd
   - rm -f /etc/motd.raw
   - systemctl restart sshd
+  - sudo -Hu labuser bash /tmp/setup-zsh.sh
+  - chsh -s /usr/bin/zsh labuser
   - echo "=== filesharing-lab-samba VM is ready! ==="
 USERDATA
 
@@ -595,6 +634,10 @@ packages:
   - iputils-ping
   - tcpdump
   - curl
+  - zsh
+  - vim
+  - nano
+  - fonts-powerline
 write_files:
   - path: /etc/profile.d/cloud-init-status.sh
     permissions: '0755'
@@ -657,6 +700,13 @@ write_files:
       \033[1;36m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m
 
 
+  - path: /tmp/setup-zsh.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      sed -i 's/^ZSH_THEME=.*/ZSH_THEME="agnoster"/' ~/.zshrc
+      sed -i 's/^plugins=(.*)/plugins=(git)/' ~/.zshrc
 runcmd:
   - netplan apply
   # Add server hostnames to /etc/hosts
@@ -680,6 +730,8 @@ runcmd:
   - printf '%b\n' "$(cat /etc/motd.raw)" > /etc/motd
   - rm -f /etc/motd.raw
   - systemctl restart sshd
+  - sudo -Hu labuser bash /tmp/setup-zsh.sh
+  - chsh -s /usr/bin/zsh labuser
   - echo "=== filesharing-lab-client VM is ready! ==="
 USERDATA
 
