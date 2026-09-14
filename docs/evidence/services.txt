@@ -1,0 +1,33 @@
+--- ftp   (vsftpd) ---
+active
+anonymous_enable=YES
+anon_root=/srv/ftp/shared
+local_enable=YES
+write_enable=YES
+chroot_local_user=YES
+pasv_enable=YES
+--- nfs   (NFS-Ganesha: an NFS server that runs in userspace) ---
+active
+    Protocols = 3, 4;
+    Path = /srv/nfs/shared;
+    Pseudo = /shared;
+    Access_Type = RW;
+    Squash = No_Root_Squash;
+        Clients = 192.168.100.0/24;
+        Access_Type = RW;
+    Path = /srv/nfs/readonly;
+    Pseudo = /readonly;
+    Access_Type = RO;
+    Squash = Root_Squash;
+        Clients = 192.168.100.0/24;
+        Access_Type = RO;
+--- samba (smbd) ---
+active
+[global]
+[shared]
+	path = /srv/samba/shared
+	read only = No
+	valid users = alice bob
+[public]
+	guest ok = Yes
+	path = /srv/samba/public

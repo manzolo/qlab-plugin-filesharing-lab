@@ -1,0 +1,82 @@
+[INFO] Running tests for plugin 'filesharing-lab'...
+
+
+══════════════════════════════════════════
+  filesharing-lab — Automated Test Suite
+══════════════════════════════════════════
+
+Exercise 1 — FTP with vsftpd
+
+  [PASS] vsftpd is active
+  [PASS] Port 21 listening
+  [PASS] User alice exists on FTP server
+  [PASS] User bob exists on FTP server
+  [PASS] Anonymous FTP has README.txt
+  [PASS] Anonymous FTP has sample.txt
+  [PASS] Client can reach FTP server
+  [PASS] ftp client installed
+  [PASS] lftp client installed
+  [PASS] Anonymous FTP download works
+  [PASS] Alice upload dir exists
+
+  Exercise 1: All 11 checks passed
+
+Exercise 2 — NFS with Ganesha
+
+  [PASS] NFS Ganesha is active
+  [PASS] Shared export exists
+  [PASS] Readonly export exists
+  [PASS] Shared dir has README.txt
+  [PASS] Readonly dir has README.txt
+  [PASS] Readonly dir has sample-data.txt
+  [PASS] Client can reach NFS server
+  [PASS] showmount installed on client
+  [PASS] Client sees NFS exports
+  [PASS] NFS shared mount readable
+  [PASS] NFS write works
+  [PASS] NFS readonly mount readable
+
+  Exercise 2: All 12 checks passed
+
+Exercise 3 — Samba
+
+  [PASS] smbd is active
+  [PASS] Port 445 (SMB) listening
+  [PASS] alice is a Samba user
+  [PASS] bob is a Samba user
+  [PASS] Shared share configured
+  [PASS] Public share configured
+  [PASS] Samba shared dir has content
+  [PASS] Samba public dir has content
+  [PASS] Client can reach Samba server
+  [PASS] smbclient installed on client
+  [PASS] Client sees shared share
+  [PASS] Client sees public share
+  [PASS] Public share readable via guest
+  [PASS] Shared share readable via auth
+
+  Exercise 3: All 14 checks passed
+
+Exercise 4 — Cross-Protocol Comparison
+
+  [PASS] ftp-server in /etc/hosts
+  [PASS] nfs-server in /etc/hosts
+  [PASS] smb-server in /etc/hosts
+  [PASS] Client can ping ftp-server
+  [PASS] Client can ping nfs-server
+  [PASS] Client can ping smb-server
+  [PASS] ftp available on client
+  [PASS] lftp available on client
+  [PASS] showmount available on client
+  [PASS] smbclient available on client
+  [PASS] Alice UID matches (2001) for NFS mapping
+  [PASS] Mount point /mnt/nfs-shared exists
+  [PASS] Mount point /mnt/nfs-readonly exists
+  [PASS] Mount point /mnt/smb-shared exists
+  [PASS] Mount point /mnt/smb-public exists
+
+  Exercise 4: All 15 checks passed
+
+==========================================
+  All 4 exercise(s) passed!
+==========================================

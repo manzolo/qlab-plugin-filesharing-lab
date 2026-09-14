@@ -59,6 +59,22 @@ A [QLab](https://github.com/manzolo/qlab) plugin for multi-VM lab that deploys t
 | alice | labpass | Lab user (UID 2001 on NFS server + client) |
 | bob | labpass | Lab user (UID 2002 on NFS server + client) |
 
+## Walkthrough
+
+`docs/` holds an illustrated account of a real run — every block of output in it
+was captured while the lab was running, not written by hand.
+
+| English | Italiano |
+|---|---|
+| [`docs/walkthrough-en.pdf`](docs/walkthrough-en.pdf) | [`docs/walkthrough-it.pdf`](docs/walkthrough-it.pdf) |
+
+```bash
+# from the qlab checkout
+python3 tools/walkthrough/build.py ../qlab-plugin-filesharing-lab        # English
+python3 tools/walkthrough/build.py ../qlab-plugin-filesharing-lab -it    # Italian
+python3 tools/walkthrough/build.py ../qlab-plugin-filesharing-lab --live # re-capture first
+```
+
 ## Usage
 
 ```bash

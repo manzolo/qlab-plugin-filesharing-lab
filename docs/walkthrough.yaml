@@ -1,0 +1,100 @@
+# filesharing-lab — what the walkthrough builder captures from a running lab.
+# Four VMs: three servers, one protocol each, and a client that talks to all of
+# them. The point is the comparison, so most blocks run from the client.
+
+evidence:
+  - id: qlab-test
+    cmd: qlab test filesharing-lab 2>&1 || true
+  - id: topology
+    cmd: |
+      for v in ftp nfs samba client; do
+        printf '%-26s ' "filesharing-lab-$v"
+        qlab shell filesharing-lab-$v --no-wait -c 'ip -br addr | grep ens4 | awk "{print \$3}"' 2>/dev/null | tail -1
+      done
+  - id: services
+    cmd: |
+      echo '--- ftp   (vsftpd) ---'
+      qlab shell filesharing-lab-ftp --no-wait -c 'systemctl is-active vsftpd; grep -E "^(anon|local_enable|chroot|write_enable|pasv_enable)" /etc/vsftpd.conf'
+      echo '--- nfs   (NFS-Ganesha: an NFS server that runs in userspace) ---'
+      qlab shell filesharing-lab-nfs --no-wait -c 'systemctl is-active nfs-ganesha; sudo grep -E "Path|Pseudo|Access_Type|Squash|Clients|Protocols" /etc/ganesha/ganesha.conf'
+      echo '--- samba (smbd) ---'
+      qlab shell filesharing-lab-samba --no-wait -c 'systemctl is-active smbd; sudo testparm -s 2>/dev/null | grep -E "^\[|path =|read only|guest ok|valid users"'
+
+  - id: ftp-session
+    vm: filesharing-lab-client
+    cmd: |
+      echo '$ a whole FTP session, scripted — anonymous first'
+      cd /tmp && rm -f from-ftp.txt
+      timeout 30 ftp -inv 192.168.100.1 <<'FTPEOF' 2>&1 | grep -aE '^(2[0-9][0-9]|1[0-9][0-9]|5[0-9][0-9]|drwx|-r|Connected|Remote)' | head -20
+      user anonymous lab@example.net
+      ls
+      get README.txt from-ftp.txt
+      bye
+      FTPEOF
+      echo
+      echo '$ and the same server as a real account'
+      timeout 30 ftp -inv 192.168.100.1 <<'FTPEOF' 2>&1 | grep -aE '^(2[0-9][0-9]|5[0-9][0-9]|Remote)' | head -8
+      user alice labpass
+      pwd
+      bye
+      FTPEOF
+      echo
+      ls -l /tmp/from-ftp.txt 2>/dev/null && cat /tmp/from-ftp.txt
+  - id: nfs-mount
+    vm: filesharing-lab-client
+    cmd: |
+      echo '$ showmount -e 192.168.100.2      (what the server offers)'
+      timeout 20 showmount -e 192.168.100.2 2>&1
+      echo
+      echo '$ mount -t nfs, then look at what landed in the filesystem'
+      sudo mkdir -p /mnt/nfs
+      sudo timeout 30 mount -t nfs 192.168.100.2:/shared /mnt/nfs 2>&1
+      mount | grep -a nfs4 | head -2
+      echo
+      ls -l /mnt/nfs
+      echo
+      echo '$ writing through the mount'
+      echo "written from the client at $(date +%H:%M:%S)" | sudo tee /mnt/nfs/from-client.txt >/dev/null
+      ls -l /mnt/nfs/from-client.txt
+  - id: nfs-identity
+    cmd: |
+      echo 'NFS moves numbers, not names. The same file, from both ends:'
+      echo '--- on the server ---'
+      qlab shell filesharing-lab-nfs --no-wait -c 'ls -l /srv/nfs/shared; echo; ls -n /srv/nfs/shared; id alice'
+      echo '--- on the client ---'
+      qlab shell filesharing-lab-client --no-wait -c 'ls -n /mnt/nfs; ls -l /mnt/nfs; id alice 2>/dev/null || echo "(no alice on the client)"'
+  - id: samba-session
+    vm: filesharing-lab-client
+    cmd: |
+      echo '$ smbclient -L    (what the server publishes)'
+      timeout 30 smbclient -L //192.168.100.3 -U alice%labpass -m SMB3 2>/dev/null | head -14
+      echo
+      echo '$ fetch a file over SMB'
+      cd /tmp && rm -f from-smb.txt
+      timeout 30 smbclient //192.168.100.3/shared -U alice%labpass -m SMB3 \
+        -c 'ls; get README.txt from-smb.txt' 2>&1 | head -10
+      ls -l /tmp/from-smb.txt 2>/dev/null
+      echo
+      echo '$ the same share without credentials'
+      timeout 30 smbclient //192.168.100.3/shared -N -m SMB3 -c 'ls' 2>&1 | head -3
+  - id: comparison
+    vm: filesharing-lab-client
+    cmd: |
+      echo 'Same job, three protocols, seen from one machine:'
+      echo
+      printf '%-8s %-10s %-37s %s\n' PROTO PORT 'HOW IT APPEARS' 'IDENTITY'
+      printf '%-8s %-10s %-37s %s\n' FTP '21 + data' 'a session; you copy files in and out' 'username + password, in clear'
+      printf '%-8s %-10s %-37s %s\n' NFS '2049' 'a directory in your filesystem' 'numeric uid/gid, trusted'
+      printf '%-8s %-10s %-37s %s\n' SMB '445' 'a share you mount or browse' 'username + password, per share'
+      echo
+      echo '$ what is actually mounted on this client right now'
+      mount | grep -aE 'nfs4|cifs' | sed 's/,/, /g' | cut -c1-100
+      echo
+      echo '$ and the three servers, from the client'
+      for p in 192.168.100.1:21 192.168.100.2:2049 192.168.100.3:445; do
+        h=${p%:*}; n=${p#*:}
+        timeout 3 bash -c "echo > /dev/tcp/$h/$n" 2>/dev/null && echo "  $p  open" || echo "  $p  closed"
+      done
+  - id: teardown
+    vm: filesharing-lab-client
+    cmd: 'sudo rm -f /mnt/nfs/from-client.txt; sudo umount /mnt/nfs 2>/dev/null || true; rm -f /tmp/from-ftp.txt /tmp/from-smb.txt; echo "client unmounted."'

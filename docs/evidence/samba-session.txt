@@ -1,0 +1,20 @@
+$ smbclient -L    (what the server publishes)
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	shared          Disk      Authenticated Read-Write Share
+	public          Disk      Public Read-Only Share
+	IPC$            IPC       IPC Service (filesharing-lab Samba Server)
+SMB1 disabled -- no workgroup available
+
+$ fetch a file over SMB
+getting file \README.txt of size 39 as from-smb.txt (390000.0 KiloBytes/sec) (average inf KiloBytes/sec)
+  .                                   D        0  Mon Sep 14 13:22:35 2026
+  ..                                  D        0  Mon Sep 14 13:22:35 2026
+  README.txt                          N       39  Mon Sep 14 13:22:35 2026
+
+		2051980 blocks of size 1024. 465716 blocks available
+-rw-r--r-- 1 labuser labuser 39 Sep 14 13:35 /tmp/from-smb.txt
+
+$ the same share without credentials
+tree connect failed: NT_STATUS_ACCESS_DENIED

@@ -1,0 +1,24 @@
+$ a whole FTP session, scripted — anonymous first
+Connected to 192.168.100.1.
+220 (vsFTPd 3.0.5)
+230 Login successful.
+Remote system type is UNIX.
+229 Entering Extended Passive Mode (|||30037|)
+150 Here comes the directory listing.
+-r-xr-xr-x    1 109      117            43 Sep 14 13:22 README.txt
+-r-xr-xr-x    1 109      117            46 Sep 14 13:22 sample.txt
+226 Directory send OK.
+229 Entering Extended Passive Mode (|||30061|)
+150 Opening BINARY mode data connection for README.txt (43 bytes).
+226 Transfer complete.
+221 Goodbye.
+
+$ and the same server as a real account
+220 (vsFTPd 3.0.5)
+230 Login successful.
+Remote system type is UNIX.
+Remote directory: /
+221 Goodbye.
+
+-rw-rw-r-- 1 labuser labuser 43 Sep 14 13:22 /tmp/from-ftp.txt
+Welcome to the filesharing-lab FTP server.

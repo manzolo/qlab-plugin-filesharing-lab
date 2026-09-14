@@ -1,0 +1,18 @@
+NFS moves numbers, not names. The same file, from both ends:
+--- on the server ---
+total 8
+-rw-r--r-- 1 alice alice 37 Sep 14 13:22 README.txt
+-rw-r--r-- 1 root  root  36 Sep 14 13:35 from-client.txt
+
+total 8
+-rw-r--r-- 1 2001 2001 37 Sep 14 13:22 README.txt
+-rw-r--r-- 1    0    0 36 Sep 14 13:35 from-client.txt
+uid=2001(alice) gid=2001(alice) groups=2001(alice)
+--- on the client ---
+total 8
+-rw-r--r-- 1 2001 2001 37 Sep 14 13:22 README.txt
+-rw-r--r-- 1    0    0 36 Sep 14 13:35 from-client.txt
+total 8
+-rw-r--r-- 1 alice alice 37 Sep 14 13:22 README.txt
+-rw-r--r-- 1 root  root  36 Sep 14 13:35 from-client.txt
+uid=2001(alice) gid=2001(alice) groups=2001(alice)

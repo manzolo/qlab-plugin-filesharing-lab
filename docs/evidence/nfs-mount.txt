@@ -1,0 +1,13 @@
+$ showmount -e 192.168.100.2      (what the server offers)
+Export list for 192.168.100.2:
+/srv/nfs/shared   192.168.100.0/24
+/srv/nfs/readonly 192.168.100.0/24
+
+$ mount -t nfs, then look at what landed in the filesystem
+192.168.100.2:/shared on /mnt/nfs type nfs4 (rw,relatime,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=192.168.100.10,local_lock=none,addr=192.168.100.2)
+
+total 4
+-rw-r--r-- 1 alice alice 37 Sep 14 13:22 README.txt
+
+$ writing through the mount
+-rw-r--r-- 1 root root 36 Sep 14 13:35 /mnt/nfs/from-client.txt

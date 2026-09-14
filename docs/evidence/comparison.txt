@@ -1,0 +1,14 @@
+Same job, three protocols, seen from one machine:
+
+PROTO    PORT       HOW IT APPEARS                        IDENTITY
+FTP      21 + data  a session; you copy files in and out  username + password, in clear
+NFS      2049       a directory in your filesystem        numeric uid/gid, trusted
+SMB      445        a share you mount or browse           username + password, per share
+
+$ what is actually mounted on this client right now
+192.168.100.2:/shared on /mnt/nfs type nfs4 (rw, relatime, vers=4.2, rsize=1048576, wsize=1048576, n
+
+$ and the three servers, from the client
+  192.168.100.1:21  open
+  192.168.100.2:2049  open
+  192.168.100.3:445  open
