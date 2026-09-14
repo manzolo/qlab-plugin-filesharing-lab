@@ -1,156 +1,51 @@
-# filesharing-lab — Samba, NFS, FTP Lab
+# filesharing-lab — FTP, NFS & SMB Lab
 
 [![QLab Plugin](https://img.shields.io/badge/QLab-Plugin-blue)](https://github.com/manzolo/qlab)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)](https://github.com/manzolo/qlab)
+[![Walkthrough](https://img.shields.io/badge/walkthrough-EN%20%26%20IT-informational)](docs/walkthrough-en.pdf)
 
-A [QLab](https://github.com/manzolo/qlab) plugin for multi-VM lab that deploys three file sharing servers (FTP, NFS, Samba) and a shared client to compare protocols, authentication models, and use cases.
+A four-VM [QLab](https://github.com/manzolo/qlab) lab — three file servers, one protocol
+each, and a client that talks to all of them — for putting FTP, NFS and Samba side by side:
+same job, three answers, three different ideas of who you are.
 
-## Architecture
-
-```
-   Internal LAN (192.168.100.0/24)
-  ┌───────────────────────────────────────────────────┐
-  │                                                   │
-  │  ┌──────────────────┐  ┌──────────────────┐       │
-  │  │ ftp-server       │  │ nfs-server       │       │
-  │  │ 192.168.100.1    │  │ 192.168.100.2    │       │
-  │  │ vsftpd (FTP:21)  │  │ NFS:2049         │       │
-  │  └────────┬─────────┘  └────────┬─────────┘       │
-  │           │                     │                 │
-  │  ┌────────┴─────────┐   ┌───────┴──────────┐      │
-  │  │ smb-server       │   │ client           │      │
-  │  │ 192.168.100.3    │   │ 192.168.100.10   │      │
-  │  │ Samba (SMB:445)  │   │ ftp/nfs/smb      │      │
-  │  └──────────────────┘   └──────────────────┘      │
-  └───────────────────────────────────────────────────┘
-```
-
-## VMs
-
-| VM | IP | Role |
-|----|-----|------|
-| filesharing-lab-ftp | 192.168.100.1 | vsftpd — local users + anonymous access |
-| filesharing-lab-nfs | 192.168.100.2 | NFS server — rw and ro exports |
-| filesharing-lab-samba | 192.168.100.3 | Samba — authenticated and guest shares |
-| filesharing-lab-client | 192.168.100.10 | Client with ftp, nfs-common, smbclient, cifs-utils |
-
-## Services
-
-**FTP Server (vsftpd):**
-- Anonymous read-only access on `/srv/ftp/shared`
-- Authenticated access with chroot per user
-- Passive mode on ports 30000-30100
-
-**NFS Server:**
-- `/srv/nfs/shared` — read-write, no_root_squash
-- `/srv/nfs/readonly` — read-only
-- UID mapping via fixed UIDs (alice=2001, bob=2002)
-
-**Samba Server:**
-- `[shared]` — read-write, authenticated (alice, bob)
-- `[public]` — read-only, guest access allowed
-
-## Credentials
-
-| User | Password | Notes |
-|------|----------|-------|
-| labuser | labpass | SSH access, sudo on all VMs |
-| alice | labpass | Lab user (UID 2001 on NFS server + client) |
-| bob | labpass | Lab user (UID 2002 on NFS server + client) |
-
-## Walkthrough
-
-`docs/` holds an illustrated account of a real run — every block of output in it
-was captured while the lab was running, not written by hand.
-
-| English | Italiano |
-|---|---|
-| [`docs/walkthrough-en.pdf`](docs/walkthrough-en.pdf) | [`docs/walkthrough-it.pdf`](docs/walkthrough-it.pdf) |
+## Quick start
 
 ```bash
-# from the qlab checkout
-python3 tools/walkthrough/build.py ../qlab-plugin-filesharing-lab        # English
-python3 tools/walkthrough/build.py ../qlab-plugin-filesharing-lab -it    # Italian
-python3 tools/walkthrough/build.py ../qlab-plugin-filesharing-lab --live # re-capture first
-```
-
-## Usage
-
-```bash
-# Install the plugin
-qlab install ./qlab-plugin-filesharing-lab
-
-# Start the lab (4 VMs)
-qlab run filesharing-lab
-
-# Connect to VMs
-qlab shell filesharing-lab-client
-qlab shell filesharing-lab-ftp
-qlab shell filesharing-lab-nfs
-qlab shell filesharing-lab-samba
-
-# View VM logs
-qlab log filesharing-lab-client
-
-# Stop all VMs
+qlab install filesharing-lab
+qlab run filesharing-lab              # boots 4 VMs (~120s)
+qlab shell filesharing-lab-client     # talks to all three servers
+qlab shell filesharing-lab-ftp        # vsftpd
+qlab shell filesharing-lab-nfs        # NFS-Ganesha
+qlab shell filesharing-lab-samba      # Samba
+qlab test filesharing-lab             # run the automated checks
 qlab stop filesharing-lab
 ```
 
-## Quick Test
+## What's inside
 
-After boot (~90 seconds), connect to the client and test all three protocols:
+| Protocol | Server | How it appears | Identity |
+|----------|--------|----------------|----------|
+| **FTP** | vsftpd | a session; you copy files in and out | username + password, in clear |
+| **NFS** | NFS-Ganesha | a directory in your filesystem | numeric uid/gid, trusted |
+| **SMB** | Samba | a share you mount or browse | username + password, per share |
 
-```bash
-qlab shell filesharing-lab-client
+The client drives all three so the comparison is the point — see the guide for the full run.
 
-# Wait for cloud-init
-cloud-init status --wait
+## Network
 
-# FTP
-ftp ftp-server
+Private LAN `192.168.100.0/24`, isolated between the four VMs.
 
-# NFS
-showmount -e nfs-server
-sudo mount -t nfs nfs-server:/srv/nfs/shared /mnt/nfs-shared
+| VM | Address | Role |
+|----|---------|------|
+| `filesharing-lab-ftp` | `192.168.100.1` | vsftpd |
+| `filesharing-lab-nfs` | `192.168.100.2` | NFS-Ganesha |
+| `filesharing-lab-samba` | `192.168.100.3` | Samba |
+| `filesharing-lab-client` | `192.168.100.10` | ftp / nfs / smbclient |
 
-# Samba
-smbclient -L smb-server -U alice
-```
+Accounts: `labuser` / `labpass` · lab users `alice`, `bob` / `labpass`. SSH forwarded — see `qlab ports`.
 
-## Exercises
+## Learn more
 
-See the [Step-by-Step Guide](guide.md) for detailed step-by-step exercises:
-
-| # | Exercise | What you'll do |
-|---|----------|----------------|
-| 1 | **FTP** | Anonymous and authenticated access, chroot, uploads |
-| 2 | **NFS** | Mount exports, test permissions, UID mapping |
-| 3 | **Samba** | smbclient, CIFS mounts, guest vs authenticated |
-| 4 | **Cross-protocol comparison** | Same operation on all three, comparison table |
-
-## Automated Tests
-
-An automated test suite validates the exercises against running VMs:
-
-```bash
-# Start the lab first
-qlab run filesharing-lab
-# Wait ~90s for cloud-init, then run all tests
-qlab test filesharing-lab
-```
-
-## Resource Override
-
-```bash
-QLAB_MEMORY=1024 QLAB_DISK_SIZE=30G qlab run filesharing-lab
-```
-
-## Reset
-
-To reset the lab, stop and re-run:
-
-```bash
-qlab stop filesharing-lab
-qlab run filesharing-lab
-```
+- 📖 **[Step-by-step guide](guide.md)** — every protocol with full commands
+- 📄 **Illustrated walkthrough** — a real run, captured live: **[English](docs/walkthrough-en.pdf)** · **[Italiano](docs/walkthrough-it.pdf)**
+- 🧩 **[QLab](https://github.com/manzolo/qlab)** — the plugin runner: how install, overlays and cloud-init work
